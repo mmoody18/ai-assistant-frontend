@@ -6,17 +6,17 @@
   <title>Syllabus AI Assistant</title>
   <style>
     body {
-  font-family: Arial, sans-serif;
-  background-image: url("background.jpg");
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  image-rendering: smooth;
-  margin: 0;
-  padding: 2rem;
-  color: #00205b;
-}
+      font-family: Arial, sans-serif;
+      background-image: url("background.jpg");
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+      image-rendering: smooth;
+      margin: 0;
+      padding: 2rem;
+      color: #00205b;
+    }
 
     .container {
       max-width: 700px;
@@ -30,11 +30,13 @@
       flex-direction: column;
       height: 80vh;
     }
+
     h1 {
       text-align: center;
       color: #9e1b32;
       margin-bottom: 1rem;
     }
+
     .chat-box {
       flex: 1;
       overflow-y: auto;
@@ -44,6 +46,7 @@
       margin-bottom: 1rem;
       border: 1px solid #ccc;
     }
+
     .message {
       max-width: 75%;
       padding: 0.75rem 1rem;
@@ -51,12 +54,14 @@
       border-radius: 10px;
       white-space: pre-wrap;
     }
+
     .user {
       background-color: #00205b;
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 0;
     }
+
     .assistant {
       background-color: #e6e6e6;
       color: #00205b;
@@ -64,10 +69,12 @@
       border-bottom-left-radius: 0;
       border-left: 4px solid #9e1b32;
     }
+
     .input-row {
       display: flex;
       gap: 0.5rem;
     }
+
     textarea {
       flex: 1;
       height: 60px;
@@ -79,6 +86,7 @@
       background: #f9f9f9;
       color: #00205b;
     }
+
     button {
       padding: 0 1.5rem;
       background: #9e1b32;
@@ -89,9 +97,11 @@
       font-weight: bold;
       cursor: pointer;
     }
+
     button:hover {
       background: #7c1529;
     }
+
     .sidebar {
       position: fixed;
       left: 0;
@@ -106,6 +116,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      transition: transform 0.3s ease;
     }
 
     .sidebar h2 {
@@ -133,74 +144,113 @@
       margin-left: 240px;
     }
 
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: #9e1b32;
+      color: white;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+      padding: 0.5rem 1rem;
+      z-index: 1100;
+    }
+
+    @media screen and (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-toggle {
+        display: block;
+      }
+
+      .main-container {
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>UNC Charlotte</h2>
-        <a href="https://my.charlotte.edu" target="_blank" class="nav-link">Student Portal</a>
-        <a href="https://canvas.charlotte.edu/" target="_blank" class="nav-link">Canvas</a>
-        <a href="https://registrar.charlotte.edu/calendar-schedules/" target="_blank" class="nav-link">University Calendar</a>
-        <a href="https://ninercentral.charlotte.edu/" target="_blank" class="nav-link">Niner Central</a>
-    </div>
-      
-    
+  <nav class="sidebar" id="sidebar">
+    <h2>UNC Charlotte</h2>
+    <a href="https://my.charlotte.edu" target="_blank" class="nav-link">Student Portal</a>
+    <a href="https://canvas.charlotte.edu/" target="_blank" class="nav-link">Canvas</a>
+    <a href="https://registrar.charlotte.edu/calendar-schedules/" target="_blank" class="nav-link">University Calendar</a>
+    <a href="https://ninercentral.charlotte.edu/" target="_blank" class="nav-link">Niner Central</a>
+  </nav>
+
+  <button id="sidebarToggle" class="sidebar-toggle">☰ Menu</button>
+
+  <div class="main-container">
     <div class="container">
-        <h1>AI Assistant</h1>
-        <div class="chat-box" id="chatBox"></div>
-            <div class="input-row">
-                <textarea id="inputText" placeholder="Ask a question..."></textarea>
-                <button onclick="askAssistant()">Send</button>
-            </div>
-        </div>
+      <h1>AI Assistant</h1>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="input-row">
+        <textarea id="inputText" placeholder="Ask a question..."></textarea>
+        <button onclick="askAssistant()">Send</button>
+      </div>
     </div>
+  </div>
 
   <script>
     const inputText = document.getElementById("inputText");
     const chatBox = document.getElementById("chatBox");
-  
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+
+    sidebarToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
     inputText.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         askAssistant();
       }
     });
-  
-async function askAssistant() {
-  const message = inputText.value.trim();
-  if (!message) return;
 
-  appendMessage("user", message);
-  inputText.value = "";
-  inputText.focus();
+    async function askAssistant() {
+      const message = inputText.value.trim();
+      if (!message) return;
 
-  const placeholder = appendMessage("assistant", "Typing...");
+      appendMessage("user", message);
+      inputText.value = "";
+      inputText.focus();
 
-  try {
-    const response = await fetch("https://ai-assistant-backend-d1bz.onrender.com/ask", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message })
-    });
+      const placeholder = appendMessage("assistant", "Typing...");
 
-    const data = await response.json();
+      try {
+        const response = await fetch("https://ai-assistant-backend-d1bz.onrender.com/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
 
-    const cleanedReply = (data.reply || "")
-      .replace(/\[\d+\]/g, "")
-      .replace(/Sources?:.*$/gis, "")
-      .replace(/https?:\/\/\S+/g, "")
-      .replace(/【[^】]*】/g, "")
-      .trim();
+        const data = await response.json();
 
-    typeText(placeholder, cleanedReply || "No response.");
-  } catch (err) {
-    console.error(err);
-    placeholder.textContent = "Error connecting to the assistant.";
-  }
+        const cleanedReply = (data.reply || "")
+          .replace(/\[\d+\]/g, "")
+          .replace(/Sources?:.*$/gis, "")
+          .replace(/https?:\/\/\S+/g, "")
+          .replace(/【[^】]*】/g, "")
+          .trim();
 
-  
+        typeText(placeholder, cleanedReply || "No response.");
+      } catch (err) {
+        console.error(err);
+        placeholder.textContent = "Error connecting to the assistant.";
+      }
+    }
+
     function appendMessage(role, text) {
       const msg = document.createElement("div");
       msg.className = `message ${role}`;
@@ -209,11 +259,11 @@ async function askAssistant() {
       chatBox.scrollTop = chatBox.scrollHeight;
       return msg;
     }
-  
+
     function typeText(element, text, speed = 15) {
       element.textContent = "";
       let i = 0;
-  
+
       function type() {
         if (i < text.length) {
           element.textContent += text.charAt(i);
@@ -222,10 +272,9 @@ async function askAssistant() {
           setTimeout(type, speed);
         }
       }
-  
+
       type();
     }
   </script>
-  
 </body>
 </html>
