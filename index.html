@@ -166,40 +166,40 @@
       }
     });
   
-    async function askAssistant() {
-      const message = inputText.value.trim();
-      if (!message) return;
-  
-      appendMessage("user", message);
-      inputText.value = "";
-      inputText.focus();
-  
-      const placeholder = appendMessage("assistant", "Typing...");
-  
-      try {
-        const response = await fetch("https://ai-assistant-backend-d1bz.onrender.com/ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ message })
-        });
-  
-        const data = await response.json();
-  
-        const cleanedReply = (data.reply || "")
-          .replace(/\[\d+\]/g, "")
-          .replace(/Sources?:.*$/gis, "")
-          .replace(/https?:\/\/\S+/g, "")
-          .replace(/【[^】]*】/g, "")
-          .trim();
-  
-        typeText(placeholder, cleanedReply || "No response.");
-      } catch (err) {
-        console.error(err);
-        placeholder.textContent = "Error connecting to the assistant.";
-      }
-    }
+async function askAssistant() {
+  const message = inputText.value.trim();
+  if (!message) return;
+
+  appendMessage("user", message);
+  inputText.value = "";
+  inputText.focus();
+
+  const placeholder = appendMessage("assistant", "Typing...");
+
+  try {
+    const response = await fetch("https://ai-assistant-backend-d1bz.onrender.com/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    const cleanedReply = (data.reply || "")
+      .replace(/\[\d+\]/g, "")
+      .replace(/Sources?:.*$/gis, "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/【[^】]*】/g, "")
+      .trim();
+
+    typeText(placeholder, cleanedReply || "No response.");
+  } catch (err) {
+    console.error(err);
+    placeholder.textContent = "Error connecting to the assistant.";
+  }
+
   
     function appendMessage(role, text) {
       const msg = document.createElement("div");
